@@ -1,0 +1,14 @@
+{
+  "name": "soukmate",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SoukMate - AI shopping assistant for Moroccan artisan goods with PayPal checkout (PayPal AI Hackathon 2026)",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
