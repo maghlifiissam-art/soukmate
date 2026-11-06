@@ -91,9 +91,13 @@ async function handleAssistant(request, env) {
   }
   const total = +items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2);
   let reply = String(parsed.reply || "Here is what I found.");
-  if (trimmed) reply += items.length
-    ? " I kept the cart within your $" + budget + " budget."
-    : " Nothing in the catalog fits that budget - try a higher one.";
+  if (trimmed) {
+    // The model's prose names its original picks; after enforcement it is stale.
+    // Build the reply from the ACTUAL retained cart so words always match the cart.
+    reply = items.length
+      ? "I picked " + items.map(i => i.name).join(" and ") + " for you, keeping the cart within your $" + budget + " budget."
+      : "Nothing in the catalog fits a $" + budget + " budget - try a higher one.";
+  }
   return json({ reply, items, total, ai: source });
 }
 
