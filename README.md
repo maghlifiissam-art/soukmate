@@ -7,8 +7,9 @@ all running against the **PayPal sandbox** (no real money moves).
 
 ## What it does
 
-1. **AI cart building** - the shopper's free-text request goes to a Gemini model
-   (`gemini-2.0-flash`) which reads the product catalog and returns strict JSON
+1. **AI cart building** - the shopper's free-text request goes to a large language model
+   (Cloudflare Workers AI `llama-3.3-70b-instruct` by default, or Google Gemini
+   `gemini-2.0-flash` when `GEMINI_API_KEY` is set) which reads the product catalog and returns strict JSON
    (`{items:[{id, qty}], reply}`). The worker validates every id against the catalog,
    recomputes all prices server-side, and clamps quantities - the model never sets prices.
 2. **PayPal checkout (sandbox)** - the frontend uses the PayPal JS SDK Smart Buttons.
@@ -23,14 +24,14 @@ all running against the **PayPal sandbox** (no real money moves).
 
 ```
 Browser (public/)                Cloudflare Worker (src/worker.js)              External APIs
- chat UI + cart        POST /api/assistant  ->  Gemini generateContent (JSON)  -> generativelanguage.googleapis.com
+ chat UI + cart        POST /api/assistant  ->  Workers AI binding (default) or Gemini generateContent (JSON)
  PayPal Smart Buttons  POST /api/paypal/order -> OAuth + Orders v2 create      -> api-m.sandbox.paypal.com
                        POST /api/paypal/order/:id/capture -> Orders v2 capture
 ```
 
 - **Frontend**: vanilla HTML/CSS/JS in `public/` (served via Workers static assets).
 - **Backend**: a single dependency-free Cloudflare Worker (`src/worker.js`).
-- **AI**: Google Gemini 2.0 Flash via REST. A clearly-labelled offline keyword matcher
+- **AI**: Cloudflare Workers AI (Llama 3.3 70B) via the free binding, no key needed. Google Gemini 2.0 Flash via REST as an optional alternative when `GEMINI_API_KEY` is set. A clearly-labelled offline keyword matcher
   (`offlineMatch`) exists only as a fallback when no API key is configured.
 - **Payments**: PayPal sandbox only (`api-m.sandbox.paypal.com` is hard-coded).
 
@@ -49,7 +50,7 @@ npm run dev                      # http://localhost:8787
 | Key | Where to get it |
 | --- | --- |
 | `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` | <https://developer.paypal.com/dashboard> -> Apps & Credentials -> Sandbox -> create a REST app (default sandbox business account) |
-| `GEMINI_API_KEY` | <https://aistudio.google.com/apikey> (free tier) |
+| `GEMINI_API_KEY` | Optional. <https://aistudio.google.com/apikey> (free tier). Not needed with the default Workers AI path |
 
 To approve a payment in the demo, log into the PayPal popup with a **sandbox personal
 (buyer) account** from the same developer dashboard (Sandbox -> Testing tools -> Accounts).
@@ -59,7 +60,7 @@ To approve a payment in the demo, log into the PayPal popup with a **sandbox per
 ```bash
 npx wrangler deploy
 npx wrangler secret put PAYPAL_CLIENT_SECRET
-npx wrangler secret put GEMINI_API_KEY
+npx wrangler secret put GEMINI_API_KEY   # optional, only to use Gemini instead of Workers AI
 # PAYPAL_CLIENT_ID is safe as a public var: npx wrangler secret put PAYPAL_CLIENT_ID (or [vars])
 ```
 
