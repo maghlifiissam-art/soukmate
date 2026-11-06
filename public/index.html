@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SoukMate - AI Souk Shopping Assistant</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+  <h1>SoukMate</h1>
+  <p class="tagline">Tell me what you need - I build your cart from Moroccan artisan goods, you check out with PayPal.</p>
+  <span class="sandbox-badge">DEMO - PayPal sandbox, no real money</span>
+</header>
+<main>
+  <section class="chat-panel">
+    <div id="chat-log" class="chat-log">
+      <div class="msg bot">Salam! Try: <em>"I need a gift for my mother under $60"</em> or <em>"something for my kitchen"</em>.</div>
+    </div>
+    <form id="chat-form" class="chat-form">
+      <input id="chat-input" type="text" placeholder="Describe what you are looking for..." autocomplete="off" required>
+      <button type="submit">Ask</button>
+    </form>
+  </section>
+  <section class="cart-panel">
+    <h2>Your cart</h2>
+    <ul id="cart-items" class="cart-items"><li class="empty">Cart is empty - ask the assistant.</li></ul>
+    <div id="cart-total" class="cart-total"></div>
+    <div id="paypal-buttons" class="paypal-buttons"></div>
+    <div id="order-result" class="order-result"></div>
+  </section>
+</main>
+<footer>Built for the PayPal AI Hackathon 2026 - MIT License - (c) ISSAM MARHLIFI</footer>
+<script src="/app.js"></script>
+</body>
+</html>
