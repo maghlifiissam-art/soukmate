@@ -1,0 +1,25 @@
+:root { --bg:#0f1b2d; --card:#182a44; --accent:#e8a33d; --text:#eef3fa; --muted:#9db2cc; }
+* { box-sizing:border-box; margin:0; }
+body { font-family:system-ui,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
+header { text-align:center; padding:28px 16px 12px; }
+header h1 { color:var(--accent); font-size:2.2rem; letter-spacing:1px; }
+.tagline { color:var(--muted); margin-top:6px; }
+.sandbox-badge { display:inline-block; margin-top:10px; padding:4px 12px; border:1px dashed var(--accent); border-radius:999px; color:var(--accent); font-size:.8rem; }
+main { flex:1; display:grid; grid-template-columns:1.2fr 1fr; gap:20px; max-width:1000px; width:100%; margin:20px auto; padding:0 16px; }
+@media (max-width:800px){ main{ grid-template-columns:1fr; } }
+.chat-panel,.cart-panel { background:var(--card); border-radius:14px; padding:18px; }
+.chat-log { min-height:220px; max-height:340px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+.msg { padding:10px 14px; border-radius:12px; max-width:85%; line-height:1.45; }
+.msg.user { align-self:flex-end; background:#274b7a; }
+.msg.bot { align-self:flex-start; background:#20344f; color:var(--text); }
+.msg.bot em { color:var(--accent); }
+.chat-form { display:flex; gap:8px; }
+.chat-form input { flex:1; padding:12px; border-radius:10px; border:1px solid #33517c; background:#0f1b2d; color:var(--text); font-size:1rem; }
+.chat-form button { padding:12px 20px; border:none; border-radius:10px; background:var(--accent); color:#1a1206; font-weight:700; cursor:pointer; }
+.cart-items { list-style:none; margin:10px 0; }
+.cart-items li { display:flex; justify-content:space-between; padding:8px 4px; border-bottom:1px solid #274b7a; }
+.cart-items .empty { color:var(--muted); border:none; }
+.cart-total { font-size:1.15rem; font-weight:700; margin:10px 0 16px; color:var(--accent); }
+.order-result { margin-top:14px; padding:12px; border-radius:10px; background:#173a2a; display:none; white-space:pre-wrap; }
+.order-result.show { display:block; }
+footer { text-align:center; color:var(--muted); font-size:.8rem; padding:16px; }
