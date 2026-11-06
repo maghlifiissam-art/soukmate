@@ -80,8 +80,21 @@ async function handleAssistant(request, env) {
     const qty = Math.max(1, Math.min(3, parseInt(it.qty, 10) || 1));
     if (c) items.push({ id: c.id, name: c.name, price: c.price, qty, lineTotal: +(c.price * qty).toFixed(2) });
   }
+  // Hard budget enforcement, server-side: never trust the model to respect a stated budget.
+  const bm = message.toLowerCase().match(/(?:under|below|max|less than|budget(?: of)?|\$)\s*\$?\s*(\d+)/);
+  let trimmed = false, budget = 0;
+  if (bm) {
+    budget = parseInt(bm[1], 10);
+    let sum = items.reduce((s2, i) => s2 + i.lineTotal, 0);
+    while (items.length > 1 && sum > budget) { sum -= items.pop().lineTotal; trimmed = true; }
+    if (items.length === 1 && sum > budget) { items.pop(); trimmed = true; }
+  }
   const total = +items.reduce((s, i) => s + i.lineTotal, 0).toFixed(2);
-  return json({ reply: String(parsed.reply || "Here is what I found."), items, total, ai: source });
+  let reply = String(parsed.reply || "Here is what I found.");
+  if (trimmed) reply += items.length
+    ? " I kept the cart within your $" + budget + " budget."
+    : " Nothing in the catalog fits that budget - try a higher one.";
+  return json({ reply, items, total, ai: source });
 }
 
 // Used only when GEMINI_API_KEY is missing/unreachable; the real path is the model above.
