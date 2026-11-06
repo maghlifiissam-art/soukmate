@@ -42,8 +42,22 @@ async function handleAssistant(request, env) {
     "Customer message: " + JSON.stringify(message)
   ].join("\n");
 
-  let parsed = null, source = "gemini";
-  if (env.GEMINI_API_KEY) {
+  // AI path 1: Cloudflare Workers AI (free daily allocation on the Workers Free plan, no key needed).
+  // AI path 2: Gemini, only when GEMINI_API_KEY is set. Path 3: offline matcher.
+  let parsed = null, source = "offline-matcher";
+  if (env.AI) {
+    try {
+      const out = await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", {
+        messages: [{ role: "user", content: prompt + "\nRespond with JSON only, no markdown." }],
+        max_tokens: 400
+      });
+      const text = (typeof out?.response === "string" && out.response)
+        || out?.choices?.[0]?.message?.content || "";
+      parsed = text ? JSON.parse(String(text).replace(/```json|```/g, "").trim()) : null;
+      if (parsed) source = "workers-ai";
+    } catch (e) { parsed = null; aiErr = String((e && e.message) || e); }
+  }
+  if (!parsed && env.GEMINI_API_KEY) {
     try {
       const r = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${env.GEMINI_API_KEY}`,
@@ -53,9 +67,10 @@ async function handleAssistant(request, env) {
       const data = await r.json();
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
       parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+      if (parsed) source = "gemini";
     } catch (e) { parsed = null; }
   }
-  if (!parsed) { source = "offline-matcher"; parsed = offlineMatch(message); }
+  if (!parsed) parsed = offlineMatch(message);
 
   // Validate against catalog; recompute prices server-side (never trust the client or the model).
   const byId = new Map(CATALOG.map(c => [c.id, c]));
@@ -151,4 +166,4 @@ async function capturePaypalOrder(orderId, env) {
   return json({ orderID: d.id, status: d.status, captureID: cap?.id || null,
     amount: cap?.amount?.value || null, currency: cap?.amount?.currency_code || "USD",
     payerEmail: d.payer?.email_address || null });
-  }
+}
