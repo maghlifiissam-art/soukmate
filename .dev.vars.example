@@ -1,0 +1,4 @@
+# Copy to .dev.vars for local development. NEVER commit real values.
+GEMINI_API_KEY=your-gemini-api-key
+PAYPAL_CLIENT_ID=your-sandbox-client-id
+PAYPAL_CLIENT_SECRET=your-sandbox-client-secret
